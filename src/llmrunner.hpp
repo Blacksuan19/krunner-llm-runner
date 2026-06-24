@@ -32,6 +32,7 @@ private:
     QString m_trigger_word;
     llm::s_config m_config;
     bool m_configured{ false };
+    bool m_show_querying_status{ true };
     int m_debounce_delay{ 800 };
     QTimer *m_debounce_timer{ nullptr };
     QString m_pending_prompt;

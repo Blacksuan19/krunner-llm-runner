@@ -3,6 +3,7 @@
 #include <KConfigGroup>
 #include <KPluginFactory>
 #include <KSharedConfig>
+#include <QCheckBox>
 #include <QComboBox>
 #include <QEventLoop>
 #include <QJsonArray>
@@ -77,6 +78,8 @@ c_llm_config::c_llm_config(QObject *parent, const KPluginMetaData &metaData)
             this, &::c_llm_config::on_settings_changed);
     connect(m_ui->debounceDelaySpin, QOverload<int>::of(&QSpinBox::valueChanged),
             this, &::c_llm_config::on_settings_changed);
+    connect(m_ui->showQueryingStatusCheck, &QCheckBox::toggled,
+            this, &::c_llm_config::on_settings_changed);
 
     load();
     refresh_model_button_state();
@@ -123,6 +126,9 @@ void c_llm_config::load()
     auto debounceDelay = group.readEntry(QStringLiteral("DebounceDelay"), 800);
     m_ui->debounceDelaySpin->setValue(debounceDelay);
 
+    auto showQueryingStatus = group.readEntry(QStringLiteral("ShowQueryingStatus"), true);
+    m_ui->showQueryingStatusCheck->setChecked(showQueryingStatus);
+
     setNeedsSave(false);
 }
 
@@ -140,6 +146,7 @@ void c_llm_config::save()
     group.writeEntry(QStringLiteral("MaxTokens"), m_ui->maxTokensSpin->value());
     group.writeEntry(QStringLiteral("Timeout"), m_ui->timeoutSpin->value() * 1000); // Convert to ms
     group.writeEntry(QStringLiteral("DebounceDelay"), m_ui->debounceDelaySpin->value());
+    group.writeEntry(QStringLiteral("ShowQueryingStatus"), m_ui->showQueryingStatusCheck->isChecked());
 
     config->sync();
     setNeedsSave(false);
@@ -156,6 +163,7 @@ void c_llm_config::defaults()
     m_ui->maxTokensSpin->setValue(150);
     m_ui->timeoutSpin->setValue(30);
     m_ui->debounceDelaySpin->setValue(800);
+    m_ui->showQueryingStatusCheck->setChecked(true);
 
     setNeedsSave(true);
 }

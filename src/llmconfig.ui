@@ -208,7 +208,27 @@
      </property>
     </widget>
    </item>
-   <item row="9" column="0" colspan="2">
+   <item row="9" column="0">
+    <widget class="QLabel" name="statusRowLabel">
+     <property name="text">
+      <string>Status Row:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="1">
+    <widget class="QCheckBox" name="showQueryingStatusCheck">
+     <property name="text">
+      <string>Show querying status while waiting</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+     <property name="toolTip">
+      <string>Show a temporary Querying LLM row before the response is ready</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="0" colspan="2">
     <widget class="QLabel" name="infoLabel">
      <property name="text">
       <string>&lt;html&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Usage:&lt;/b&gt; Type your trigger word followed by your question in KRunner.&lt;/p&gt;&lt;p&gt;Example: &lt;i&gt;llm what is the capital of France?&lt;/i&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>

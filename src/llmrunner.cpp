@@ -51,6 +51,7 @@ void c_llm_runner::load_config()
     auto max_tokens = group.readEntry(QStringLiteral("MaxTokens"), 150);
     auto timeout = group.readEntry(QStringLiteral("Timeout"), 30000);
     auto debounce_delay = group.readEntry(QStringLiteral("DebounceDelay"), 800);
+    auto show_querying_status = group.readEntry(QStringLiteral("ShowQueryingStatus"), true);
 
     m_configured = !api_key.isEmpty();
 
@@ -87,6 +88,7 @@ void c_llm_runner::load_config()
     m_config.max_tokens = max_tokens;
     m_config.timeout_ms = timeout;
     m_debounce_delay = debounce_delay;
+    m_show_querying_status = show_querying_status;
 
     // Update timer interval if timer already exists
     if (m_debounce_timer)
@@ -175,7 +177,10 @@ void c_llm_runner::match(KRunner::RunnerContext &context)
 
     if (prompt == m_inflight_prompt)
     {
-        add_querying_match(prompt, context);
+        if (m_show_querying_status)
+        {
+            add_querying_match(prompt, context);
+        }
         return;
     }
 
@@ -187,7 +192,10 @@ void c_llm_runner::match(KRunner::RunnerContext &context)
     m_cached_prompt.clear();
     m_debounce_timer->start();
 
-    add_querying_match(prompt, context);
+    if (m_show_querying_status)
+    {
+        add_querying_match(prompt, context);
+    }
 }
 
 void c_llm_runner::perform_query(const QString &prompt, KRunner::RunnerContext &context)

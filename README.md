@@ -96,6 +96,7 @@ Available settings:
 - **Max Tokens**: Response length limit.
 - **Timeout**: Request timeout in seconds.
 - **Debounce Delay**: Delay before sending the request after typing stops.
+- **Status Row**: Show or hide the temporary `Querying LLM...` row while waiting for a response.
 
 For OpenAI-compatible proxies, configure the API base as either the `/v1` base URL or the full chat completions endpoint:
 

@@ -2,6 +2,10 @@
     "KPlugin": {
         "Authors": [
             {
+                "Name": "Abubakar Yagoub",
+                "Email": "plasma@aolabs.dev"
+            },
+            {
                 "Email": "archishman@example.com",
                 "Name": "Archishman"
             }

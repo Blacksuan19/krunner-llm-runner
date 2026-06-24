@@ -7,8 +7,12 @@
         "Category": "Utilities",
         "Icon": "dialog-information",
         "EnabledByDefault": true,
-        "Website": "https://github.com/archishman/krunner-llm",
+        "Website": "https://github.com/Blacksuan19/krunner-llm-runner",
         "Authors": [
+            {
+                "Name": "Abubakar Yagoub",
+                "Email": "plasma@aolabs.dev"
+            },
             {
                 "Name": "Archishman",
                 "Email": "archishman@example.com"

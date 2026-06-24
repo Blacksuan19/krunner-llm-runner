@@ -23,51 +23,34 @@ A KDE Plasma 6 KRunner plugin for sending short prompts to hosted LLM APIs or Op
 - CMake 3.28 or later
 - C++23 compiler
 
-## Dependencies
+## Build Dependencies
 
-Arch Linux:
+Install packages that provide these CMake targets:
+
+- `ECM`
+- `Qt6::Core`, `Qt6::Network`, `Qt6::Widgets`, `Qt6::Gui`
+- `KF6::CoreAddons`, `KF6::Runner`, `KF6::I18n`
+- `KF6::ConfigCore`, `KF6::ConfigWidgets`, `KF6::KCMUtils`
+
+On Arch Linux:
 
 ```bash
 sudo pacman -S \
     extra-cmake-modules \
     qt6-base \
-    qt6-tools \
-    kf6-runner \
-    kf6-i18n \
-    kf6-config \
-    kf6-kcmutils
-```
-
-Ubuntu/Debian:
-
-```bash
-sudo apt install \
-    extra-cmake-modules \
-    qt6-base-dev \
-    qt6-base-dev-tools \
-    libkf6runner-dev \
-    libkf6i18n-dev \
-    libkf6config-dev \
-    libkf6configwidgets-dev \
-    libkf6kcmutils-dev
-```
-
-Fedora:
-
-```bash
-sudo dnf install \
-    extra-cmake-modules \
-    qt6-qtbase-devel \
-    kf6-kcmutils-devel \
-    kf6-kconfig-devel \
-    kf6-kconfigwidgets-devel \
-    kf6-ki18n-devel \
-    kf6-krunner-devel
+    kcoreaddons \
+    krunner \
+    ki18n \
+    kconfig \
+    kconfigwidgets \
+    kcmutils
 ```
 
 ## Install
 
 LLM Runner is available from KDE's Get New Stuff flow:
+
+The KDE Store package uses the same build/install script as a source checkout, so the build dependencies above must be installed first.
 
 1. Open KDE System Settings.
 2. Go to Search -> KRunner.

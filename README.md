@@ -65,7 +65,18 @@ sudo dnf install \
     kf6-krunner-devel
 ```
 
-## Build And Install
+## Install
+
+LLM Runner is available from KDE's Get New Stuff flow:
+
+1. Open KDE System Settings.
+2. Go to Search -> KRunner.
+3. Select Get New Plugins.
+4. Search for `LLM Runner`.
+
+KDE Store page: <https://store.kde.org/p/2363680>
+
+## Build From Source
 
 ```bash
 ./build.sh

@@ -25,6 +25,8 @@ private:
     [[nodiscard]] auto create_client() const -> std::unique_ptr<llm::c_client>;
     void handle_error(const llm ::s_error &error, KRunner::RunnerContext &context);
     void perform_query(const QString &prompt, KRunner::RunnerContext &context);
+    void add_response_match(const QString &prompt, const QString &response, KRunner::RunnerContext &context);
+    void add_querying_match(const QString &prompt, KRunner::RunnerContext &context);
 
     QString m_trigger_word;
     llm::s_config m_config;
@@ -33,6 +35,11 @@ private:
     QTimer *m_debounce_timer{ nullptr };
     QString m_pending_prompt;
     KRunner::RunnerContext m_pending_context;
+    QString m_inflight_prompt;
+    QString m_cached_prompt;
+    QString m_cached_response;
+    llm::s_error m_cached_error{};
+    bool m_cached_is_error{ false };
 };
 
 #endif // LLMRUNNER_HPP

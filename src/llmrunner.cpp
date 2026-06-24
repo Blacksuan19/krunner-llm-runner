@@ -8,6 +8,14 @@
 
 K_PLUGIN_CLASS_WITH_JSON(c_llm_runner, "plasma-runner-llm.json")
 
+namespace
+{
+    [[nodiscard]] auto match_id_for_prompt(const QString &prompt) -> QString
+    {
+        return QStringLiteral("llm-response:%1").arg(prompt);
+    }
+} // namespace
+
 c_llm_runner::c_llm_runner(QObject *parent, const KPluginMetaData &metaData)
     : AbstractRunner(parent, metaData)
 {
@@ -106,6 +114,7 @@ void c_llm_runner::match(KRunner::RunnerContext &context)
     if (!m_configured)
     {
         KRunner::QueryMatch match(this);
+        match.setId(QStringLiteral("llm-not-configured"));
         match.setCategoryRelevance(KRunner::QueryMatch::CategoryRelevance::Moderate);
         match.setIconName(QStringLiteral("configure"));
         match.setText(i18n("LLM Runner Not Configured"));
@@ -124,6 +133,7 @@ void c_llm_runner::match(KRunner::RunnerContext &context)
         m_pending_prompt.clear();
 
         KRunner::QueryMatch match(this);
+        match.setId(QStringLiteral("llm-help"));
         match.setCategoryRelevance(KRunner::QueryMatch::CategoryRelevance::Moderate);
         match.setIconName(QStringLiteral("help-about"));
         match.setText(i18n("Ask LLM"));
@@ -133,20 +143,34 @@ void c_llm_runner::match(KRunner::RunnerContext &context)
         return;
     }
 
+    if (prompt == m_cached_prompt)
+    {
+        if (m_cached_is_error)
+        {
+            handle_error(m_cached_error, context);
+        }
+        else
+        {
+            add_response_match(prompt, m_cached_response, context);
+        }
+        return;
+    }
+
+    if (prompt == m_inflight_prompt)
+    {
+        add_querying_match(prompt, context);
+        return;
+    }
+
     // Cancel any pending request and schedule a new one
     m_debounce_timer->stop();
     m_pending_prompt = prompt;
     m_pending_context = context;
+    m_inflight_prompt = prompt;
+    m_cached_prompt.clear();
     m_debounce_timer->start();
 
-    // Show a "typing" indicator while waiting
-    KRunner::QueryMatch typing_match(this);
-    typing_match.setCategoryRelevance(KRunner::QueryMatch::CategoryRelevance::Moderate);
-    typing_match.setIconName(QStringLiteral("edit-find"));
-    typing_match.setText(i18n("Press Enter to query LLM"));
-    typing_match.setSubtext(prompt);
-    typing_match.setRelevance(0.9);
-    context.addMatch(typing_match);
+    add_querying_match(prompt, context);
 }
 
 void c_llm_runner::perform_query(const QString &prompt, KRunner::RunnerContext &context)
@@ -156,30 +180,35 @@ void c_llm_runner::perform_query(const QString &prompt, KRunner::RunnerContext &
         return;
     }
 
-    // Show a "querying" match
-    KRunner::QueryMatch querying_match(this);
-    querying_match.setCategoryRelevance(KRunner::QueryMatch::CategoryRelevance::Moderate);
-    querying_match.setIconName(QStringLiteral("system-run"));
-    querying_match.setText(i18n("Querying LLM..."));
-    querying_match.setSubtext(prompt);
-    querying_match.setRelevance(0.9);
-    context.addMatch(querying_match);
-
     // Perform the actual query
     auto client = create_client();
     auto result = client->send_message(prompt);
 
     if (!result.has_value())
     {
-        handle_error(result.error(), context);
+        m_cached_prompt = prompt;
+        m_cached_error = result.error();
+        m_cached_is_error = true;
+        m_inflight_prompt.clear();
+        handle_error(m_cached_error, context);
         return;
     }
 
-    const auto &response = result.value();
+    m_cached_prompt = prompt;
+    m_cached_response = result.value();
+    m_cached_is_error = false;
+    m_inflight_prompt.clear();
+    add_response_match(prompt, m_cached_response, context);
+}
 
+void c_llm_runner::add_response_match(const QString &prompt,
+                                      const QString &response,
+                                      KRunner::RunnerContext &context)
+{
     KRunner::QueryMatch match(this);
+    match.setId(match_id_for_prompt(prompt));
     match.setCategoryRelevance(KRunner::QueryMatch::CategoryRelevance::Highest);
-    match.setIconName(QStringLiteral("dialog-information"));
+    match.setIconName(QStringLiteral("edit-copy"));
     match.setText(response);
     match.setSubtext(i18n("Click to copy response"));
     match.setRelevance(1.0);
@@ -187,10 +216,23 @@ void c_llm_runner::perform_query(const QString &prompt, KRunner::RunnerContext &
     match.setMultiLine(true);
 
     // Add action to copy to clipboard
-    KRunner::Action copy_action(QStringLiteral("edit-copy"), QStringLiteral("copy"), i18n("Copy to Clipboard"));
+    KRunner::Action copy_action(QStringLiteral("copy"), QStringLiteral("edit-copy"), i18n("Copy to Clipboard"));
     match.setActions({ copy_action });
 
     context.addMatch(match);
+}
+
+void c_llm_runner::add_querying_match(const QString &prompt, KRunner::RunnerContext &context)
+{
+    KRunner::QueryMatch querying_match(this);
+    querying_match.setId(match_id_for_prompt(prompt));
+    querying_match.setCategoryRelevance(KRunner::QueryMatch::CategoryRelevance::Moderate);
+    querying_match.setIconName(QStringLiteral("view-refresh"));
+    querying_match.setText(i18n("Querying LLM..."));
+    querying_match.setSubtext(prompt);
+    querying_match.setRelevance(0.9);
+    querying_match.setEnabled(false);
+    context.addMatch(querying_match);
 }
 
 void c_llm_runner::run(const KRunner::RunnerContext &context,
@@ -219,7 +261,7 @@ void c_llm_runner::handle_error(const llm::s_error &error, KRunner::RunnerContex
         break;
     case llm::e_error_code::invalid_api_key:
         error_text = i18n("API Key Error");
-        error_subtext = i18n("Invalid or missing API key");
+        error_subtext = error.message.isEmpty() ? i18n("Invalid or missing API key") : error.message;
         break;
     case llm::e_error_code::invalid_response:
         error_text = i18n("Invalid Response");
@@ -236,11 +278,18 @@ void c_llm_runner::handle_error(const llm::s_error &error, KRunner::RunnerContex
     }
 
     KRunner::QueryMatch error_match(this);
+    error_match.setId(QStringLiteral("llm-error:%1").arg(error_subtext));
     error_match.setIconName(QStringLiteral("dialog-error"));
     error_match.setText(error_text);
     error_match.setSubtext(error_subtext);
+    error_match.setData(error.details.isEmpty() ? error.message : error.details);
+    error_match.setMultiLine(true);
     error_match.setRelevance(0.8);
     error_match.setCategoryRelevance(KRunner::QueryMatch::CategoryRelevance::High);
+
+    KRunner::Action copy_action(QStringLiteral("copy"), QStringLiteral("edit-copy"), i18n("Copy Error Details"));
+    error_match.setActions({ copy_action });
+
     context.addMatch(error_match);
 }
 

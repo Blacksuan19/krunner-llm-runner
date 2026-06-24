@@ -208,7 +208,7 @@ void c_llm_runner::add_response_match(const QString &prompt,
     KRunner::QueryMatch match(this);
     match.setId(match_id_for_prompt(prompt));
     match.setCategoryRelevance(KRunner::QueryMatch::CategoryRelevance::Highest);
-    match.setIconName(QStringLiteral("edit-copy"));
+    match.setIconName(QStringLiteral("dialog-information"));
     match.setText(response);
     match.setSubtext(i18n("Click to copy response"));
     match.setRelevance(1.0);

@@ -57,27 +57,44 @@
     </widget>
    </item>
    <item row="3" column="0">
-    <widget class="QLabel" name="modelLabel">
+    <widget class="QLabel" name="apiBaseLabel">
      <property name="text">
-      <string>Model:</string>
+      <string>API Base URL:</string>
      </property>
     </widget>
    </item>
    <item row="3" column="1">
+    <widget class="QLineEdit" name="apiBaseEdit">
+     <property name="placeholderText">
+      <string>Only needed for OpenAI-compatible proxies</string>
+     </property>
+     <property name="toolTip">
+      <string>Base URL for OpenAI-compatible APIs. Use the /v1 base URL or the full /v1/chat/completions endpoint.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="modelLabel">
+     <property name="text">
+      <string>Model:</string>
+     </property>
+   </widget>
+   </item>
+   <item row="4" column="1">
     <widget class="QLineEdit" name="modelEdit">
      <property name="toolTip">
       <string>The model to use (e.g., gpt-4, claude-3-5-sonnet-20241022)</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="0">
+   <item row="5" column="0">
     <widget class="QLabel" name="maxTokensLabel">
      <property name="text">
       <string>Max Tokens:</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="1">
+   <item row="5" column="1">
     <widget class="QSpinBox" name="maxTokensSpin">
      <property name="minimum">
       <number>50</number>
@@ -93,14 +110,14 @@
      </property>
     </widget>
    </item>
-   <item row="5" column="0">
+   <item row="6" column="0">
     <widget class="QLabel" name="timeoutLabel">
      <property name="text">
       <string>Timeout (seconds):</string>
      </property>
     </widget>
    </item>
-   <item row="5" column="1">
+   <item row="6" column="1">
     <widget class="QSpinBox" name="timeoutSpin">
      <property name="minimum">
       <number>5</number>
@@ -116,14 +133,14 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="0">
+   <item row="7" column="0">
     <widget class="QLabel" name="debounceDelayLabel">
      <property name="text">
       <string>Debounce Delay (ms):</string>
      </property>
     </widget>
    </item>
-   <item row="6" column="1">
+   <item row="7" column="1">
     <widget class="QSpinBox" name="debounceDelaySpin">
      <property name="minimum">
       <number>0</number>
@@ -139,7 +156,7 @@
      </property>
     </widget>
    </item>
-   <item row="7" column="0" colspan="2">
+   <item row="8" column="0" colspan="2">
     <widget class="QLabel" name="infoLabel">
      <property name="text">
       <string>&lt;html&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Usage:&lt;/b&gt; Type your trigger word followed by your question in KRunner.&lt;/p&gt;&lt;p&gt;Example: &lt;i&gt;llm what is the capital of France?&lt;/i&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>

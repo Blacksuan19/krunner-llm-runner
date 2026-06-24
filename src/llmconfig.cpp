@@ -14,6 +14,7 @@ c_llm_config::c_llm_config(QObject *parent, const KPluginMetaData &metaData)
 
     // Populate provider combo box
     m_ui->providerCombo->addItem(QStringLiteral("OpenAI"), QStringLiteral("OpenAI"));
+    m_ui->providerCombo->addItem(QStringLiteral("OpenAI Compatible"), QStringLiteral("OpenAICompatible"));
     m_ui->providerCombo->addItem(QStringLiteral("Anthropic"), QStringLiteral("Anthropic"));
     m_ui->providerCombo->addItem(QStringLiteral("OpenRouter"), QStringLiteral("OpenRouter"));
     m_ui->providerCombo->addItem(QStringLiteral("Google Gemini"), QStringLiteral("Gemini"));
@@ -22,6 +23,8 @@ c_llm_config::c_llm_config(QObject *parent, const KPluginMetaData &metaData)
     connect(m_ui->providerCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &::c_llm_config::on_provider_changed);
     connect(m_ui->apiKeyEdit, &QLineEdit::textChanged,
+            this, &::c_llm_config::on_settings_changed);
+    connect(m_ui->apiBaseEdit, &QLineEdit::textChanged,
             this, &::c_llm_config::on_settings_changed);
     connect(m_ui->modelEdit, &QLineEdit::textChanged,
             this, &::c_llm_config::on_settings_changed);
@@ -53,6 +56,9 @@ void c_llm_config::load()
     auto apiKey = group.readEntry(QStringLiteral("ApiKey"), QString());
     m_ui->apiKeyEdit->setText(apiKey);
 
+    auto apiBase = group.readEntry(QStringLiteral("ApiBase"), QString());
+    m_ui->apiBaseEdit->setText(apiBase);
+
     auto provider = group.readEntry(QStringLiteral("Provider"), QStringLiteral("OpenAI"));
     int providerIndex = m_ui->providerCombo->findData(provider);
     if (providerIndex >= 0)
@@ -82,6 +88,7 @@ void c_llm_config::save()
 
     group.writeEntry(QStringLiteral("TriggerWord"), m_ui->triggerWordEdit->text());
     group.writeEntry(QStringLiteral("ApiKey"), m_ui->apiKeyEdit->text());
+    group.writeEntry(QStringLiteral("ApiBase"), m_ui->apiBaseEdit->text().trimmed());
     group.writeEntry(QStringLiteral("Provider"), m_ui->providerCombo->currentData().toString());
     group.writeEntry(QStringLiteral("Model"), m_ui->modelEdit->text());
     group.writeEntry(QStringLiteral("MaxTokens"), m_ui->maxTokensSpin->value());
@@ -96,6 +103,7 @@ void c_llm_config::defaults()
 {
     m_ui->triggerWordEdit->setText(QStringLiteral("llm"));
     m_ui->apiKeyEdit->clear();
+    m_ui->apiBaseEdit->clear();
     m_ui->providerCombo->setCurrentIndex(0); // OpenAI
     m_ui->modelEdit->setText(QStringLiteral("gpt-4"));
     m_ui->maxTokensSpin->setValue(150);
@@ -115,26 +123,37 @@ void c_llm_config::on_provider_changed(int index)
     {
         m_ui->modelEdit->setText(QStringLiteral("gpt-4"));
         m_ui->modelEdit->setPlaceholderText(QStringLiteral("e.g., gpt-4, gpt-3.5-turbo"));
+        m_ui->apiBaseEdit->setPlaceholderText(QStringLiteral("Only needed for OpenAI-compatible proxies"));
+    }
+    else if (provider == QStringLiteral("OpenAICompatible"))
+    {
+        m_ui->modelEdit->setText(QStringLiteral("gpt-4o-mini"));
+        m_ui->modelEdit->setPlaceholderText(QStringLiteral("Model name exposed by your proxy"));
+        m_ui->apiBaseEdit->setPlaceholderText(QStringLiteral("e.g., http://localhost:8000/v1"));
     }
     else if (provider == QStringLiteral("Anthropic"))
     {
         m_ui->modelEdit->setText(QStringLiteral("claude-3-5-sonnet-20241022"));
         m_ui->modelEdit->setPlaceholderText(QStringLiteral("e.g., claude-3-5-sonnet-20241022"));
+        m_ui->apiBaseEdit->setPlaceholderText(QStringLiteral("Only used by OpenAI-compatible proxies"));
     }
     else if (provider == QStringLiteral("OpenRouter"))
     {
         m_ui->modelEdit->setText(QStringLiteral("anthropic/claude-3.5-sonnet"));
         m_ui->modelEdit->setPlaceholderText(QStringLiteral("e.g., anthropic/claude-3.5-sonnet"));
+        m_ui->apiBaseEdit->setPlaceholderText(QStringLiteral("Only used by OpenAI-compatible proxies"));
     }
     else if (provider == QStringLiteral("Gemini"))
     {
         m_ui->modelEdit->setText(QStringLiteral("gemini-2.0-flash-exp"));
         m_ui->modelEdit->setPlaceholderText(QStringLiteral("e.g., gemini-2.0-flash-exp, gemini-1.5-pro"));
+        m_ui->apiBaseEdit->setPlaceholderText(QStringLiteral("Only used by OpenAI-compatible proxies"));
     }
     else if (provider == QStringLiteral("Groq"))
     {
         m_ui->modelEdit->setText(QStringLiteral("llama-3.3-70b-versatile"));
         m_ui->modelEdit->setPlaceholderText(QStringLiteral("e.g., llama-3.3-70b-versatile, mixtral-8x7b-32768"));
+        m_ui->apiBaseEdit->setPlaceholderText(QStringLiteral("Only used by OpenAI-compatible proxies"));
     }
 
     on_settings_changed();

@@ -15,6 +15,7 @@ private Q_SLOTS:
     void test_error_handling();
     void test_provider_endpoints();
     void test_request_building();
+    void test_openai_compatible_config();
     void cleanup_test_case();
 
 private:
@@ -31,12 +32,14 @@ void c_test_llm_client::test_config_creation()
     llm::s_config config;
     config.provider = llm::e_provider::OpenAI;
     config.apiKey = QStringLiteral("test-key");
+    config.apiBase = QStringLiteral("https://proxy.example.com/v1");
     config.model = QStringLiteral("gpt-4");
     config.max_tokens = 100;
     config.timeout_ms = 30000;
 
     QCOMPARE(config.provider, llm::e_provider::OpenAI);
     QCOMPARE(config.apiKey, QStringLiteral("test-key"));
+    QCOMPARE(config.apiBase, QStringLiteral("https://proxy.example.com/v1"));
     QCOMPARE(config.model, QStringLiteral("gpt-4"));
     QCOMPARE(config.max_tokens, 100);
     QCOMPARE(config.timeout_ms, 30000);
@@ -90,13 +93,20 @@ void c_test_llm_client::test_provider_endpoints()
     openrouter_config.apiKey = QStringLiteral("test-key");
     openrouter_config.model = QStringLiteral("anthropic/claude-3.5-sonnet");
 
+    llm::s_config proxy_config;
+    proxy_config.provider = llm::e_provider::OpenAICompatible;
+    proxy_config.apiBase = QStringLiteral("https://proxy.example.com/v1");
+    proxy_config.model = QStringLiteral("custom-model");
+
     auto openai_client = std::make_unique<llm::c_client>(openai_config);
     auto anthropic_client = std::make_unique<llm::c_client>(anthropic_config);
     auto openrouter_client = std::make_unique<llm::c_client>(openrouter_config);
+    auto proxy_client = std::make_unique<llm::c_client>(proxy_config);
 
     QVERIFY(openai_client != nullptr);
     QVERIFY(anthropic_client != nullptr);
     QVERIFY(openrouter_client != nullptr);
+    QVERIFY(proxy_client != nullptr);
 }
 
 void c_test_llm_client::test_request_building()
@@ -112,6 +122,24 @@ void c_test_llm_client::test_request_building()
     QVERIFY(config.timeout_ms > 0);
 }
 
+void c_test_llm_client::test_openai_compatible_config()
+{
+    llm::s_config config;
+    config.provider = llm::e_provider::OpenAICompatible;
+    config.apiKey = QString();
+    config.apiBase = QStringLiteral("http://localhost:8000/v1");
+    config.model = QStringLiteral("local-model");
+    config.max_tokens = 200;
+    config.timeout_ms = 1000;
+
+    auto client = std::make_unique<llm::c_client>(config);
+
+    QVERIFY(client != nullptr);
+    QCOMPARE(config.provider, llm::e_provider::OpenAICompatible);
+    QCOMPARE(config.apiBase, QStringLiteral("http://localhost:8000/v1"));
+    QVERIFY(config.apiKey.isEmpty());
+}
+
 void c_test_llm_client::cleanup_test_case()
 {
     // Cleanup
@@ -122,6 +150,7 @@ auto c_test_llm_client::create_test_config() -> llm::s_config
     llm::s_config config;
     config.provider = llm::e_provider::OpenAI;
     config.apiKey = QStringLiteral("test-api-key");
+    config.apiBase = QString();
     config.model = QStringLiteral("gpt-4");
     config.max_tokens = 100;
     config.timeout_ms = 30000;

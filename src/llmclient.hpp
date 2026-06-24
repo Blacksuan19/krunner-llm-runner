@@ -21,6 +21,7 @@ namespace llm
     enum class e_provider : std::uint8_t
     {
         OpenAI,
+        OpenAICompatible,
         Anthropic,
         OpenRouter,
         Gemini,
@@ -40,6 +41,7 @@ namespace llm
     {
         e_error_code code;
         QString message;
+        QString details{};
     };
 
     struct s_message
@@ -52,6 +54,7 @@ namespace llm
     {
         e_provider provider{ e_provider::OpenAI };
         QString apiKey;
+        QString apiBase;
         QString model;
         int max_tokens{ 150 };
         int timeout_ms{ 30000 };

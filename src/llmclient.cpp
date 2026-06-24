@@ -2,6 +2,82 @@
 
 namespace llm
 {
+    namespace
+    {
+        [[nodiscard]] auto extract_error_message(const QByteArray &data) -> QString
+        {
+            if (data.isEmpty())
+            {
+                return {};
+            }
+
+            const auto doc = QJsonDocument::fromJson(data);
+            if (!doc.isObject())
+            {
+                return QString::fromUtf8(data).trimmed();
+            }
+
+            const auto obj = doc.object();
+            const auto error_value = obj.value(QStringLiteral("error"));
+            if (error_value.isObject())
+            {
+                const auto error_obj = error_value.toObject();
+                const auto message = error_obj.value(QStringLiteral("message")).toString();
+                if (!message.isEmpty())
+                {
+                    return message;
+                }
+            }
+            else if (error_value.isString())
+            {
+                return error_value.toString();
+            }
+
+            const auto message = obj.value(QStringLiteral("message")).toString();
+            if (!message.isEmpty())
+            {
+                return message;
+            }
+
+            return QString::fromUtf8(data).trimmed();
+        }
+
+        [[nodiscard]] auto error_code_for_status(int status_code, QNetworkReply::NetworkError reply_error) -> e_error_code
+        {
+            if (reply_error == QNetworkReply::TimeoutError)
+            {
+                return e_error_code::timeout;
+            }
+
+            if (status_code == 401 || status_code == 403)
+            {
+                return e_error_code::invalid_api_key;
+            }
+
+            if (status_code == 429)
+            {
+                return e_error_code::rate_limited;
+            }
+
+            return e_error_code::network_error;
+        }
+
+        [[nodiscard]] auto chat_completions_endpoint(QString api_base) -> QString
+        {
+            api_base = api_base.trimmed();
+            while (api_base.endsWith(QLatin1Char('/')))
+            {
+                api_base.chop(1);
+            }
+
+            if (api_base.endsWith(QStringLiteral("/chat/completions")))
+            {
+                return api_base;
+            }
+
+            return api_base + QStringLiteral("/chat/completions");
+        }
+    } // namespace
 
     c_client::c_client(s_config config) : m_config(std::move(config))
     {
@@ -26,6 +102,9 @@ namespace llm
 
         loop.exec();
 
+        const auto status_code = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        const auto response_data = reply->readAll();
+
         if (reply->error() == QNetworkReply::TimeoutError)
         {
             reply->deleteLater();
@@ -34,12 +113,26 @@ namespace llm
 
         if (reply->error() != QNetworkReply::NoError)
         {
-            auto error_message = reply->errorString();
+            auto error_message = extract_error_message(response_data);
+            if (error_message.isEmpty())
+            {
+                error_message = reply->errorString();
+            }
+
+            auto error_details = error_message;
+            if (status_code > 0)
+            {
+                error_message = QStringLiteral("HTTP %1: %2").arg(status_code).arg(error_message);
+                error_details = QStringLiteral("%1\nEndpoint: %2")
+                                    .arg(error_message)
+                                    .arg(request.url().toString());
+            }
+
+            const auto error_code = error_code_for_status(status_code, reply->error());
             reply->deleteLater();
-            return std::unexpected(s_error{ .code = e_error_code::network_error, .message = error_message });
+            return std::unexpected(s_error{ .code = error_code, .message = error_message, .details = error_details });
         }
 
-        auto response_data = reply->readAll();
         reply->deleteLater();
 
         return parse_response(response_data);
@@ -54,10 +147,14 @@ namespace llm
         switch (m_config.provider)
         {
         case e_provider::OpenAI:
+        case e_provider::OpenAICompatible:
         case e_provider::OpenRouter:
         case e_provider::Groq:
-            request.setRawHeader("Authorization",
-                                 QStringLiteral("Bearer %1").arg(m_config.apiKey).toUtf8());
+            if (!m_config.apiKey.isEmpty())
+            {
+                request.setRawHeader("Authorization",
+                                     QStringLiteral("Bearer %1").arg(m_config.apiKey).toUtf8());
+            }
             break;
         case e_provider::Anthropic:
             request.setRawHeader("x-api-key", m_config.apiKey.toUtf8());
@@ -80,6 +177,7 @@ namespace llm
         switch (m_config.provider)
         {
         case e_provider::OpenAI:
+        case e_provider::OpenAICompatible:
         case e_provider::OpenRouter:
         case e_provider::Groq:
         {
@@ -155,6 +253,7 @@ namespace llm
         switch (m_config.provider)
         {
         case e_provider::OpenAI:
+        case e_provider::OpenAICompatible:
         case e_provider::OpenRouter:
         case e_provider::Groq:
         {
@@ -233,6 +332,8 @@ namespace llm
         {
         case e_provider::OpenAI:
             return QStringLiteral("https://api.openai.com/v1/chat/completions");
+        case e_provider::OpenAICompatible:
+            return chat_completions_endpoint(m_config.apiBase);
         case e_provider::Anthropic:
             return QStringLiteral("https://api.anthropic.com/v1/messages");
         case e_provider::OpenRouter:

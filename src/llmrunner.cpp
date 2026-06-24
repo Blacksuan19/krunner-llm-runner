@@ -34,6 +34,7 @@ void c_llm_runner::load_config()
     m_trigger_word = group.readEntry(QStringLiteral("TriggerWord"), QStringLiteral("llm"));
 
     auto api_key = group.readEntry(QStringLiteral("ApiKey"), QString());
+    auto api_base = group.readEntry(QStringLiteral("ApiBase"), QString());
     auto provider = group.readEntry(QStringLiteral("Provider"), QStringLiteral("OpenAI"));
     auto model = group.readEntry(QStringLiteral("Model"), QStringLiteral("gpt-4"));
     auto max_tokens = group.readEntry(QStringLiteral("MaxTokens"), 150);
@@ -45,6 +46,11 @@ void c_llm_runner::load_config()
     if (provider == QStringLiteral("OpenAI"))
     {
         m_config.provider = llm::e_provider::OpenAI;
+    }
+    else if (provider == QStringLiteral("OpenAICompatible"))
+    {
+        m_config.provider = llm::e_provider::OpenAICompatible;
+        m_configured = !api_base.trimmed().isEmpty();
     }
     else if (provider == QStringLiteral("Anthropic"))
     {
@@ -64,6 +70,7 @@ void c_llm_runner::load_config()
     }
 
     m_config.apiKey = api_key;
+    m_config.apiBase = api_base;
     m_config.model = model;
     m_config.max_tokens = max_tokens;
     m_config.timeout_ms = timeout;
@@ -102,7 +109,7 @@ void c_llm_runner::match(KRunner::RunnerContext &context)
         match.setCategoryRelevance(KRunner::QueryMatch::CategoryRelevance::Moderate);
         match.setIconName(QStringLiteral("configure"));
         match.setText(i18n("LLM Runner Not Configured"));
-        match.setSubtext(i18n("Please configure your API key in KRunner settings"));
+        match.setSubtext(i18n("Please configure your provider settings in KRunner settings"));
         match.setRelevance(1.0);
         context.addMatch(match);
         return;

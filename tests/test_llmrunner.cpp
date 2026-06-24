@@ -32,6 +32,7 @@ void c_test_llm_runner::setup_test_config()
     group.writeEntry(QStringLiteral("TriggerWord"), QStringLiteral("llm"));
     group.writeEntry(QStringLiteral("Provider"), QStringLiteral("OpenAI"));
     group.writeEntry(QStringLiteral("ApiKey"), QStringLiteral("test-key"));
+    group.writeEntry(QStringLiteral("ApiBase"), QStringLiteral("https://proxy.example.com/v1"));
     group.writeEntry(QStringLiteral("Model"), QStringLiteral("gpt-4"));
     group.writeEntry(QStringLiteral("MaxTokens"), 150);
     group.writeEntry(QStringLiteral("Timeout"), 30000);
@@ -59,11 +60,13 @@ void c_test_llm_runner::test_config_loading()
     auto trigger_word = group.readEntry(QStringLiteral("TriggerWord"), QString());
     auto provider = group.readEntry(QStringLiteral("Provider"), QString());
     auto api_key = group.readEntry(QStringLiteral("ApiKey"), QString());
+    auto api_base = group.readEntry(QStringLiteral("ApiBase"), QString());
     auto model = group.readEntry(QStringLiteral("Model"), QString());
 
     QCOMPARE(trigger_word, QStringLiteral("llm"));
     QCOMPARE(provider, QStringLiteral("OpenAI"));
     QCOMPARE(api_key, QStringLiteral("test-key"));
+    QCOMPARE(api_base, QStringLiteral("https://proxy.example.com/v1"));
     QCOMPARE(model, QStringLiteral("gpt-4"));
 }
 

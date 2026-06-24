@@ -2,6 +2,10 @@
 
 A KDE Plasma 6 KRunner plugin for sending short prompts to hosted LLM APIs or OpenAI-compatible proxies.
 
+| KRunner                                      | Settings                                         |
+| -------------------------------------------- | ------------------------------------------------ |
+| ![KRunner response](screenshots/krunner.png) | ![LLM Runner settings](screenshots/settings.png) |
+
 ## Supported Providers
 
 - OpenAI

@@ -227,7 +227,6 @@ void c_llm_runner::add_response_match(const QString &prompt,
     match.setCategoryRelevance(KRunner::QueryMatch::CategoryRelevance::Highest);
     match.setIconName(QStringLiteral("dialog-information"));
     match.setText(response);
-    match.setSubtext(i18n("Click to copy response"));
     match.setRelevance(1.0);
     match.setData(response);
     match.setMultiLine(true);

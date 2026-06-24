@@ -19,13 +19,12 @@ set_target_properties(llmclient PROPERTIES
 )
 
 # Runner Plugin
-add_library(krunner_llm MODULE)
-
-target_sources(krunner_llm
-    PRIVATE
+kcoreaddons_add_plugin(krunner_llm
+    SOURCES
     llmrunner.cpp
     llmrunner.hpp
     plasma-runner-llm.json
+    INSTALL_NAMESPACE "kf6/krunner"
 )
 
 target_link_libraries(krunner_llm
@@ -41,21 +40,15 @@ target_link_libraries(krunner_llm
     llmclient
 )
 
-# Install plugin
-install(TARGETS krunner_llm DESTINATION ${KDE_INSTALL_QTPLUGINDIR}/kf6/krunner)
-
-# Install metadata
-install(FILES plasma-runner-llm.desktop DESTINATION ${KDE_INSTALL_DATADIR}/krunner/dbusplugins)
-
 # Configuration UI
-add_library(kcm_krunner_llm MODULE)
-set_target_properties(kcm_krunner_llm PROPERTIES AUTOUIC ON)
-target_sources(kcm_krunner_llm
-    PRIVATE
+kcoreaddons_add_plugin(kcm_krunner_llm
+    SOURCES
     llmconfig.cpp
     llmconfig.hpp
     kcm_krunner_llm.json
+    INSTALL_NAMESPACE "kf6/krunner/kcms"
 )
+set_target_properties(kcm_krunner_llm PROPERTIES AUTOUIC ON)
 
 ki18n_wrap_ui(kcm_krunner_llm llmconfig.ui)
 
@@ -67,6 +60,3 @@ target_link_libraries(kcm_krunner_llm
     KF6::I18n
     Qt6::Widgets
 )
-
-install(TARGETS kcm_krunner_llm DESTINATION ${KDE_INSTALL_QTPLUGINDIR})
-install(FILES kcm_krunner_llm.desktop DESTINATION ${KDE_INSTALL_DATADIR}/krunner/kcms)

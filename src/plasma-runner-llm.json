@@ -15,7 +15,7 @@
             }
         ]
     },
-    "X-KDE-ConfigModule": "kcm_krunner_llm",
+    "X-KDE-ConfigModule": "kf6/krunner/kcms/kcm_krunner_llm",
     "X-Plasma-AdvertiseSingleRunnerQueryMode": true,
     "X-Plasma-Request-Actions-Once": false
 }

@@ -26,6 +26,7 @@ find_package(Qt6 6.6.0 REQUIRED COMPONENTS
 )
 
 find_package(KF6 6.0.0 REQUIRED COMPONENTS
+    CoreAddons
     Runner
     I18n
     Config

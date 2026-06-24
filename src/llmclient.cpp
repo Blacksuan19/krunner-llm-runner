@@ -172,8 +172,6 @@ namespace llm
     {
         QJsonObject json;
 
-        QString prompt = prompt_text + QStringLiteral("\nAnswer in few lines. Preferably 2-3 sentences.");
-
         switch (m_config.provider)
         {
         case e_provider::OpenAI:
@@ -182,9 +180,17 @@ namespace llm
         case e_provider::Groq:
         {
             QJsonArray messages;
+            if (!m_config.systemPrompt.trimmed().isEmpty())
+            {
+                QJsonObject system_message;
+                system_message[QStringLiteral("role")] = QStringLiteral("system");
+                system_message[QStringLiteral("content")] = m_config.systemPrompt.trimmed();
+                messages.append(system_message);
+            }
+
             QJsonObject message;
             message[QStringLiteral("role")] = QStringLiteral("user");
-            message[QStringLiteral("content")] = prompt;
+            message[QStringLiteral("content")] = prompt_text;
             messages.append(message);
 
             json[QStringLiteral("model")] = m_config.model;
@@ -197,19 +203,23 @@ namespace llm
             QJsonArray messages;
             QJsonObject message;
             message[QStringLiteral("role")] = QStringLiteral("user");
-            message[QStringLiteral("content")] = prompt;
+            message[QStringLiteral("content")] = prompt_text;
             messages.append(message);
 
             json[QStringLiteral("model")] = m_config.model;
             json[QStringLiteral("messages")] = messages;
             json[QStringLiteral("max_tokens")] = m_config.max_tokens;
+            if (!m_config.systemPrompt.trimmed().isEmpty())
+            {
+                json[QStringLiteral("system")] = m_config.systemPrompt.trimmed();
+            }
             break;
         }
         case e_provider::Gemini:
         {
             QJsonArray parts;
             QJsonObject part;
-            part[QStringLiteral("text")] = prompt;
+            part[QStringLiteral("text")] = prompt_text;
             parts.append(part);
 
             QJsonArray contents;
@@ -222,6 +232,19 @@ namespace llm
             QJsonObject generation_config;
             generation_config[QStringLiteral("maxOutputTokens")] = m_config.max_tokens;
             json[QStringLiteral("generationConfig")] = generation_config;
+
+            if (!m_config.systemPrompt.trimmed().isEmpty())
+            {
+                QJsonObject system_part;
+                system_part[QStringLiteral("text")] = m_config.systemPrompt.trimmed();
+
+                QJsonArray system_parts;
+                system_parts.append(system_part);
+
+                QJsonObject system_instruction;
+                system_instruction[QStringLiteral("parts")] = system_parts;
+                json[QStringLiteral("systemInstruction")] = system_instruction;
+            }
             break;
         }
         }

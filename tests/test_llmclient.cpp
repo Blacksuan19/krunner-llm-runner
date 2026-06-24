@@ -33,6 +33,7 @@ void c_test_llm_client::test_config_creation()
     config.provider = llm::e_provider::OpenAI;
     config.apiKey = QStringLiteral("test-key");
     config.apiBase = QStringLiteral("https://proxy.example.com/v1");
+    config.systemPrompt = QStringLiteral("Answer briefly.");
     config.model = QStringLiteral("gpt-4");
     config.max_tokens = 100;
     config.timeout_ms = 30000;
@@ -40,6 +41,7 @@ void c_test_llm_client::test_config_creation()
     QCOMPARE(config.provider, llm::e_provider::OpenAI);
     QCOMPARE(config.apiKey, QStringLiteral("test-key"));
     QCOMPARE(config.apiBase, QStringLiteral("https://proxy.example.com/v1"));
+    QCOMPARE(config.systemPrompt, QStringLiteral("Answer briefly."));
     QCOMPARE(config.model, QStringLiteral("gpt-4"));
     QCOMPARE(config.max_tokens, 100);
     QCOMPARE(config.timeout_ms, 30000);
@@ -128,6 +130,7 @@ void c_test_llm_client::test_openai_compatible_config()
     config.provider = llm::e_provider::OpenAICompatible;
     config.apiKey = QString();
     config.apiBase = QStringLiteral("http://localhost:8000/v1");
+    config.systemPrompt = QStringLiteral("Use concise answers.");
     config.model = QStringLiteral("local-model");
     config.max_tokens = 200;
     config.timeout_ms = 1000;
@@ -137,6 +140,7 @@ void c_test_llm_client::test_openai_compatible_config()
     QVERIFY(client != nullptr);
     QCOMPARE(config.provider, llm::e_provider::OpenAICompatible);
     QCOMPARE(config.apiBase, QStringLiteral("http://localhost:8000/v1"));
+    QCOMPARE(config.systemPrompt, QStringLiteral("Use concise answers."));
     QVERIFY(config.apiKey.isEmpty());
 }
 
@@ -151,6 +155,7 @@ auto c_test_llm_client::create_test_config() -> llm::s_config
     config.provider = llm::e_provider::OpenAI;
     config.apiKey = QStringLiteral("test-api-key");
     config.apiBase = QString();
+    config.systemPrompt = QString();
     config.model = QStringLiteral("gpt-4");
     config.max_tokens = 100;
     config.timeout_ms = 30000;

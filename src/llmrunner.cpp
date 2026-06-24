@@ -43,6 +43,7 @@ void c_llm_runner::load_config()
 
     auto api_key = group.readEntry(QStringLiteral("ApiKey"), QString());
     auto api_base = group.readEntry(QStringLiteral("ApiBase"), QString());
+    auto system_prompt = group.readEntry(QStringLiteral("SystemPrompt"), QString());
     auto provider = group.readEntry(QStringLiteral("Provider"), QStringLiteral("OpenAI"));
     auto model = group.readEntry(QStringLiteral("Model"), QStringLiteral("gpt-4"));
     auto max_tokens = group.readEntry(QStringLiteral("MaxTokens"), 150);
@@ -79,6 +80,7 @@ void c_llm_runner::load_config()
 
     m_config.apiKey = api_key;
     m_config.apiBase = api_base;
+    m_config.systemPrompt = system_prompt;
     m_config.model = model;
     m_config.max_tokens = max_tokens;
     m_config.timeout_ms = timeout;
@@ -94,6 +96,19 @@ void c_llm_runner::load_config()
 auto c_llm_runner::create_client() const -> std::unique_ptr<llm ::c_client>
 {
     return std::make_unique<llm::c_client>(m_config);
+}
+
+void c_llm_runner::reloadConfiguration()
+{
+    load_config();
+    setMinLetterCount(m_trigger_word.length() + 2);
+    m_debounce_timer->setInterval(m_debounce_delay);
+    m_pending_prompt.clear();
+    m_inflight_prompt.clear();
+    m_cached_prompt.clear();
+    m_cached_response.clear();
+    m_cached_error = {};
+    m_cached_is_error = false;
 }
 
 void c_llm_runner::match(KRunner::RunnerContext &context)

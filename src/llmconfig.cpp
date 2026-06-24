@@ -28,6 +28,8 @@ c_llm_config::c_llm_config(QObject *parent, const KPluginMetaData &metaData)
             this, &::c_llm_config::on_settings_changed);
     connect(m_ui->modelEdit, &QLineEdit::textChanged,
             this, &::c_llm_config::on_settings_changed);
+    connect(m_ui->systemPromptEdit, &QPlainTextEdit::textChanged,
+            this, &::c_llm_config::on_settings_changed);
     connect(m_ui->triggerWordEdit, &QLineEdit::textChanged,
             this, &::c_llm_config::on_settings_changed);
     connect(m_ui->maxTokensSpin, QOverload<int>::of(&QSpinBox::valueChanged),
@@ -69,6 +71,9 @@ void c_llm_config::load()
     auto model = group.readEntry(QStringLiteral("Model"), QStringLiteral("gpt-4"));
     m_ui->modelEdit->setText(model);
 
+    auto systemPrompt = group.readEntry(QStringLiteral("SystemPrompt"), QString());
+    m_ui->systemPromptEdit->setPlainText(systemPrompt);
+
     auto maxTokens = group.readEntry(QStringLiteral("MaxTokens"), 150);
     m_ui->maxTokensSpin->setValue(maxTokens);
 
@@ -91,6 +96,7 @@ void c_llm_config::save()
     group.writeEntry(QStringLiteral("ApiBase"), m_ui->apiBaseEdit->text().trimmed());
     group.writeEntry(QStringLiteral("Provider"), m_ui->providerCombo->currentData().toString());
     group.writeEntry(QStringLiteral("Model"), m_ui->modelEdit->text());
+    group.writeEntry(QStringLiteral("SystemPrompt"), m_ui->systemPromptEdit->toPlainText().trimmed());
     group.writeEntry(QStringLiteral("MaxTokens"), m_ui->maxTokensSpin->value());
     group.writeEntry(QStringLiteral("Timeout"), m_ui->timeoutSpin->value() * 1000); // Convert to ms
     group.writeEntry(QStringLiteral("DebounceDelay"), m_ui->debounceDelaySpin->value());
@@ -106,6 +112,7 @@ void c_llm_config::defaults()
     m_ui->apiBaseEdit->clear();
     m_ui->providerCombo->setCurrentIndex(0); // OpenAI
     m_ui->modelEdit->setText(QStringLiteral("gpt-4"));
+    m_ui->systemPromptEdit->clear();
     m_ui->maxTokensSpin->setValue(150);
     m_ui->timeoutSpin->setValue(30);
     m_ui->debounceDelaySpin->setValue(800);

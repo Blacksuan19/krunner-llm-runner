@@ -55,6 +55,7 @@ namespace llm
         e_provider provider{ e_provider::OpenAI };
         QString apiKey;
         QString apiBase;
+        QString systemPrompt;
         QString model;
         int max_tokens{ 150 };
         int timeout_ms{ 30000 };

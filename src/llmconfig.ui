@@ -81,11 +81,40 @@
    </widget>
    </item>
    <item row="4" column="1">
-    <widget class="QLineEdit" name="modelEdit">
-     <property name="toolTip">
-      <string>The model to use (e.g., gpt-4, claude-3-5-sonnet-20241022)</string>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="modelLayout">
+     <item>
+      <widget class="QComboBox" name="modelCombo">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+       <property name="toolTip">
+        <string>The model to use (e.g., gpt-4, claude-3-5-sonnet-20241022)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="refreshModelsButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Refresh Models</string>
+       </property>
+       <property name="toolTip">
+        <string>Fetch models from supported providers</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item row="5" column="0">
     <widget class="QLabel" name="systemPromptLabel">

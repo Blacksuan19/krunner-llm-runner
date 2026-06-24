@@ -91,7 +91,7 @@ Available settings:
 - **Provider**: Hosted provider or `OpenAI Compatible`.
 - **API Key**: Provider API key. For local proxies this may be empty if the proxy does not require auth.
 - **API Base URL**: Only used for OpenAI-compatible APIs.
-- **Model**: Model name sent to the provider.
+- **Model**: Model name sent to the provider. For OpenAI, OpenRouter, and OpenAI-compatible APIs, the settings UI can fetch available model IDs from `/models`.
 - **System Prompt**: Optional instructions sent with each request. Defaults to concise 2-3 sentence answers.
 - **Max Tokens**: Response length limit.
 - **Timeout**: Request timeout in seconds.
@@ -106,6 +106,7 @@ Model: your-proxy-model-name
 ```
 
 The plugin appends `/chat/completions` unless the URL already ends with `/chat/completions`.
+Model discovery uses the same base URL and queries `/models`.
 
 ## Usage
 

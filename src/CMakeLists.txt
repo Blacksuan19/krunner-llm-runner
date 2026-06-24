@@ -58,5 +58,6 @@ target_link_libraries(kcm_krunner_llm
     KF6::ConfigWidgets
     KF6::KCMUtils
     KF6::I18n
+    Qt6::Network
     Qt6::Widgets
 )

@@ -92,7 +92,7 @@ Available settings:
 - **API Key**: Provider API key. For local proxies this may be empty if the proxy does not require auth.
 - **API Base URL**: Only used for OpenAI-compatible APIs.
 - **Model**: Model name sent to the provider.
-- **System Prompt**: Optional instructions sent with each request.
+- **System Prompt**: Optional instructions sent with each request. Defaults to concise 2-3 sentence answers.
 - **Max Tokens**: Response length limit.
 - **Timeout**: Request timeout in seconds.
 - **Debounce Delay**: Delay before sending the request after typing stops.

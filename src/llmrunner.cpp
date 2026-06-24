@@ -10,6 +10,8 @@ K_PLUGIN_CLASS_WITH_JSON(c_llm_runner, "plasma-runner-llm.json")
 
 namespace
 {
+    constexpr auto DEFAULT_SYSTEM_PROMPT = "Answer in few lines. Preferably 2-3 sentences.";
+
     [[nodiscard]] auto match_id_for_prompt(const QString &prompt) -> QString
     {
         return QStringLiteral("llm-response:%1").arg(prompt);
@@ -43,7 +45,7 @@ void c_llm_runner::load_config()
 
     auto api_key = group.readEntry(QStringLiteral("ApiKey"), QString());
     auto api_base = group.readEntry(QStringLiteral("ApiBase"), QString());
-    auto system_prompt = group.readEntry(QStringLiteral("SystemPrompt"), QString());
+    auto system_prompt = group.readEntry(QStringLiteral("SystemPrompt"), QString::fromLatin1(DEFAULT_SYSTEM_PROMPT));
     auto provider = group.readEntry(QStringLiteral("Provider"), QStringLiteral("OpenAI"));
     auto model = group.readEntry(QStringLiteral("Model"), QStringLiteral("gpt-4"));
     auto max_tokens = group.readEntry(QStringLiteral("MaxTokens"), 150);

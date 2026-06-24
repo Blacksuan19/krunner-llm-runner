@@ -7,6 +7,11 @@
 
 K_PLUGIN_CLASS_WITH_JSON(c_llm_config, "kcm_krunner_llm.json")
 
+namespace
+{
+    constexpr auto DEFAULT_SYSTEM_PROMPT = "Answer in few lines. Preferably 2-3 sentences.";
+}
+
 c_llm_config::c_llm_config(QObject *parent, const KPluginMetaData &metaData)
     : KCModule(parent, metaData), m_ui(new Ui::LLMConfigWidget)
 {
@@ -71,7 +76,7 @@ void c_llm_config::load()
     auto model = group.readEntry(QStringLiteral("Model"), QStringLiteral("gpt-4"));
     m_ui->modelEdit->setText(model);
 
-    auto systemPrompt = group.readEntry(QStringLiteral("SystemPrompt"), QString());
+    auto systemPrompt = group.readEntry(QStringLiteral("SystemPrompt"), QString::fromLatin1(DEFAULT_SYSTEM_PROMPT));
     m_ui->systemPromptEdit->setPlainText(systemPrompt);
 
     auto maxTokens = group.readEntry(QStringLiteral("MaxTokens"), 150);
@@ -112,7 +117,7 @@ void c_llm_config::defaults()
     m_ui->apiBaseEdit->clear();
     m_ui->providerCombo->setCurrentIndex(0); // OpenAI
     m_ui->modelEdit->setText(QStringLiteral("gpt-4"));
-    m_ui->systemPromptEdit->clear();
+    m_ui->systemPromptEdit->setPlainText(QString::fromLatin1(DEFAULT_SYSTEM_PROMPT));
     m_ui->maxTokensSpin->setValue(150);
     m_ui->timeoutSpin->setValue(30);
     m_ui->debounceDelaySpin->setValue(800);
